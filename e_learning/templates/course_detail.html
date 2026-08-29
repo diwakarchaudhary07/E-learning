@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="course-detail py-5">
+    <div class="container">
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-8">
+                <span class="section-label">{{ course.category }}</span>
+                <h1 class="mb-3">{{ course.title }}</h1>
+                <p class="lead text-muted">{{ course.description }}</p>
+
+                <div class="detail-summary">
+                    <div><i class="fa-solid fa-chalkboard-user"></i> Instructor: {{ course.instructor }}</div>
+                    <div><i class="fa-solid fa-language"></i> Language: {{ course.language }}</div>
+                    <div><i class="fa-solid fa-clock"></i> Duration: {{ course.duration }}</div>
+                    <div><i class="fa-solid fa-book-open"></i> Lessons: {{ course.total_lessons }}</div>
+                    <div><i class="fa-solid fa-circle-question"></i> Quizzes: {{ course.total_quizzes }}</div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="price-card">
+                    <h4>Enroll now</h4>
+                    <div class="price-row">
+                        <span class="price">₹{{ course.discount_price }}</span>
+                        {% if course.discount_price < course.price %}
+                        <span class="old-price">₹{{ course.price }}</span>
+                        {% endif %}
+                    </div>
+                    <p>Master practical skills with a structured learning path and guided practice.</p>
+                    <a href="{% url 'courses' %}" class="btn btn-outline-primary">Back to courses</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

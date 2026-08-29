@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4 p-md-5">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h2 class="fw-bold mb-1" style="color: #1f4d4d;">Dashboard</h2>
+              <p class="text-muted mb-0">Welcome back, {{ user.full_name|default:user.username }}.</p>
+            </div>
+            <a href="{% url 'logout' %}" class="btn btn-outline" style="border-color: #1f4d4d; color: #1f4d4d;">Logout</a>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="p-4 rounded-4" style="background: #f6f9f7; border: 1px solid #e4ece9;">
+                <h5 class="fw-semibold" style="color: #1f4d4d;">Profile</h5>
+                <p class="mb-1"><strong>Email:</strong> {{ user.email }}</p>
+                <p class="mb-0"><strong>Username:</strong> {{ user.username }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-4 rounded-4" style="background: #fff8e8; border: 1px solid #f4e2b1;">
+                <h5 class="fw-semibold" style="color: #1f4d4d;">Learning progress</h5>
+                <p class="mb-0">Your personalized learning path is ready.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="ai-chat-page py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <h2 class="mb-4">AI Help Chat</h2>
+                        <p class="mb-4">Use the chat to ask about courses, live classes, or how to navigate the site.</p>
+                        <div class="ai-chat-window bg-light rounded p-3 mb-3" style="min-height: 380px;">
+                            <div class="ai-chat-messages"></div>
+                        </div>
+                        <form id="aiChatForm" class="input-group" novalidate>
+                            <input type="text" name="message" id="aiChatInput" class="form-control" placeholder="Ask a question..." autocomplete="off" required>
+                            <button class="btn btn-danger" type="submit">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

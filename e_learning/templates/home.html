@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-video-wrapper" aria-hidden="true">
+        <video class="hero-video" autoplay muted loop playsinline preload="auto">
+            <source src="{% static 'assets/video banner.mp4' %}" type="video/mp4">
+        </video>
+    </div>
+</div> 
+
+<section id="live-classes" class="live-classes-section py-5">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <span class="section-label">Live Classes</span>
+            <h2>Join expert-led sessions in real time</h2>
+            <p>Get live coaching, interactive practice, and instant feedback from instructors during scheduled classes.</p>
+        </div>
+        <div class="live-classes-grid text-center">
+            <p class="mb-0">Explore the latest live class schedule and reserve your seat. Visit the dashboard or contact us to learn more.</p>
+        </div>
+    </div>
+</section>
+
+<section id="courses" class="courses-section">
+    <div class="container py-5">
+        <div class="section-header text-center mb-5">
+            <span class="section-label">Our Courses</span>
+            <h2>Explore all course paths</h2>
+            <p>Choose from a wide range of programs designed to help you learn faster and grow smarter.</p>
+        </div>
+        <div class="courses-grid">
+            {% for course in courses %}
+            <article class="course-card">
+                <div class="course-tag">{{ course.category }}</div>
+                <h3>{{ course.title }}</h3>
+                <p>{{ course.description|truncatechars:100 }}</p>
+                <div class="course-meta">
+                    <span><i class="fa-solid fa-book-open"></i> {{ course.total_lessons }} lessons</span>
+                    <span><i class="fa-solid fa-circle-question"></i> {{ course.total_quizzes }} quizzes</span>
+                </div>
+                <div class="course-footer">
+                    <div>
+                        <strong>₹{{ course.discount_price }}</strong>
+                        {% if course.discount_price < course.price %}
+                        <span class="old-price">₹{{ course.price }}</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'course_detail' course.slug %}" class="course-link">View</a>
+                </div>
+            </article>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-muted">No courses available yet. Add a course from the admin panel to see it here.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}

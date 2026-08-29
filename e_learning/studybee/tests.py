@@ -1,0 +1,144 @@
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.urls import reverse
+
+from .models import Course, CustomUser, LiveClass, OtpVerification
+
+
+class CustomUserModelTests(TestCase):
+    def test_create_user_with_custom_fields(self):
+        User = get_user_model()
+
+        user = User.objects.create_user(
+            username='johndoe',
+            email='johndoe@example.com',
+            password='testpass123',
+            full_name='John Doe',
+            mobile_no='9876543210',
+            dob='1990-01-01',
+            address='123 Main Street',
+            alternate_mobile_no='9876543211',
+            gender='M',
+        )
+
+        self.assertEqual(user.full_name, 'John Doe')
+        self.assertEqual(user.email, 'johndoe@example.com')
+        self.assertEqual(user.mobile_no, '9876543210')
+        self.assertEqual(user.address, '123 Main Street')
+        self.assertEqual(user.gender, 'M')
+        self.assertTrue(user.check_password('testpass123'))
+
+
+class CourseModelTests(TestCase):
+    def test_create_course_with_required_fields(self):
+        course = Course.objects.create(
+            title='Django Masterclass',
+            slug='django-masterclass',
+            category='Web Development',
+            instructor='John Doe',
+            description='Learn Django from scratch.',
+            price=199,
+            discount_price=149,
+            language='English',
+            duration='8 weeks',
+            total_lessons=24,
+            total_quizzes=8,
+        )
+
+        self.assertEqual(course.title, 'Django Masterclass')
+        self.assertEqual(course.slug, 'django-masterclass')
+        self.assertEqual(course.category, 'Web Development')
+        self.assertEqual(course.discount_price, 149)
+        self.assertEqual(course.total_lessons, 24)
+        self.assertEqual(str(course), 'Django Masterclass')
+
+
+class EmailOtpRegistrationTests(TestCase):
+    def test_register_creates_unverified_user_and_otp(self):
+        response = self.client.post(reverse('register'), {
+            'username': 'newuser',
+            'full_name': 'New User',
+            'email': 'newuser@example.com',
+            'mobile_no': '9876543210',
+            'password1': 'StrongPass123',
+            'password2': 'StrongPass123',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('verify-otp', response.url)
+        user = CustomUser.objects.get(username='newuser')
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.is_email_verified)
+        self.assertTrue(OtpVerification.objects.filter(user=user).exists())
+
+
+class ProfilePageTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            username='profileuser',
+            email='profile@example.com',
+            password='StrongPass123',
+            full_name='Jane Doe',
+            mobile_no='9876543210',
+            dob='1998-03-15',
+            gender='Female',
+        )
+        self.client.force_login(self.user)
+
+    def test_profile_page_shows_user_details(self):
+        response = self.client.get(reverse('profile'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Jane Doe')
+        self.assertContains(response, 'profile@example.com')
+        self.assertContains(response, 'Female')
+        self.assertContains(response, 'Edit Profile')
+
+    def test_profile_page_updates_user_details(self):
+        response = self.client.post(reverse('profile'), {
+            'full_name': 'Jane Smith',
+            'email': 'jane@example.com',
+            'mobile_no': '1111111111',
+            'dob': '1999-06-20',
+            'gender': 'Female',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.full_name, 'Jane Smith')
+        self.assertEqual(self.user.email, 'jane@example.com')
+        self.assertEqual(self.user.mobile_no, '1111111111')
+
+
+class LiveClassPageTests(TestCase):
+    def test_live_classes_page_loads(self):
+        response = self.client.get(reverse('live_classes'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Live Class')
+        self.assertContains(response, 'Upcoming Live Classes')
+
+    def test_live_classes_page_uses_database_records(self):
+        live_class = LiveClass.objects.create(
+            title='Django API Fundamentals',
+            subject='Django',
+            course_name='Backend Development',
+            instructor_name='Amit Kumar',
+            instructor_profile='Senior Backend Mentor',
+            class_date='2026-08-30',
+            class_time='10:00:00',
+            duration_minutes=90,
+            status=LiveClass.STATUS_LIVE,
+            student_count=86,
+            live_indicator=True,
+            description='Learn APIs and clean backend patterns.',
+            join_link='https://example.com/django-live'
+        )
+
+        response = self.client.get(reverse('live_classes'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Django API Fundamentals')
+        self.assertContains(response, 'Amit Kumar')
+        self.assertContains(response, 'Backend Development')
+        self.assertContains(response, 'LIVE')

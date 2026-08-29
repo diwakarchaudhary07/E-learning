@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="about-banner">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="section-label">{{ about.title|default:"About StudyBee" }}</span>
+                <h1 class="display-5 fw-bold mb-4">{{ about.subtitle|default:"Empowering learners to grow with confidence." }}</h1>
+                <p class="lead mb-4">{{ about.overview|default:"StudyBee helps students and professionals learn faster with practical courses, expert mentorship, and a supportive digital community built for real-world growth." }}</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Join Us</a>
+                    <a href="{% url 'home' %}" class="btn btn-outline-primary btn-lg">Explore Courses</a>
+                </div>
+
+                <div class="about-stats row g-3">
+                    <div class="col-6 col-md-3">
+                        <div class="about-stat">
+                            <strong>10K+</strong>
+                            <span>Learners</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="about-stat">
+                            <strong>500+</strong>
+                            <span>Courses</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="about-stat">
+                            <strong>96%</strong>
+                            <span>Success</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="about-stat">
+                            <strong>24/7</strong>
+                            <span>Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 text-center">
+                {% if about.banner_image %}
+                    <img src="{{ about.banner_image.url }}" alt="About banner" class="img-fluid rounded-4 shadow-lg about-banner-img">
+                {% else %}
+                    <div class="about-banner-fallback rounded-4 shadow-lg">
+                        <p class="mb-0">Your story starts here.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="about-details">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card feature-mission">
+                    <h3>Our Mission</h3>
+                    <p>{{ about.mission|default:"To make quality education accessible, practical, and empowering for every learner who wants to grow, innovate, and succeed." }}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card feature-vision">
+                    <h3>Our Vision</h3>
+                    <p>{{ about.vision|default:"To become the most trusted learning platform for career-ready skills, leadership, and lifelong education in a digital-first world." }}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card feature-values">
+                    <h3>Our Values</h3>
+                    <p>{{ about.values|default:"Integrity, excellence, learner-first support, and continuous innovation in everything we build and teach." }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-3 align-items-center">
+            <div class="col-lg-6">
+                <div class="story-panel">
+                    <span class="badge">Why StudyBee</span>
+                    <h3>Learning that feels personal, practical, and purposeful.</h3>
+                    <p>We combine expert instruction, flexible learning paths, and a supportive community so every learner can move from curiosity to confidence. Whether you are learning for a career shift, exam preparation, or personal growth, StudyBee gives you the structure and guidance to keep progressing.</p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <ul class="feature-list">
+                    <li>
+                        <div>
+                            <strong>Career-ready education</strong>
+                            <span>Our programs focus on practical skills that help learners build real confidence for work, jobs, and future goals.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <strong>Expert-led guidance</strong>
+                            <span>Learn from experienced mentors, educators, and specialists who simplify complex topics and make success achievable.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <strong>Flexible learning experience</strong>
+                            <span>Study anywhere, at your own pace, with resources designed to fit busy schedules and modern learning habits.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

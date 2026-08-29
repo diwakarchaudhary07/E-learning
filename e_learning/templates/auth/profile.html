@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="profile-page py-5">
+    <div class="container">
+        <div class="row g-4 align-items-stretch">
+            <div class="col-lg-4">
+                <div class="profile-card profile-card--hero h-100">
+                    <div class="profile-avatar-wrapper">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" alt="{{ user.full_name|default:user.username }}" class="profile-avatar">
+                        {% else %}
+                            <div class="profile-avatar profile-avatar--fallback">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h2 class="profile-name">{{ user.full_name|default:user.username }}</h2>
+                    <p class="profile-role">Student profile</p>
+                    <div class="profile-badge-row">
+                        <span class="profile-badge"><i class="fa-solid fa-envelope me-2"></i>{{ user.email }}</span>
+                        <span class="profile-badge"><i class="fa-solid fa-phone me-2"></i>{{ user.mobile_no|default:'Add your phone number' }}</span>
+                        <span class="profile-badge"><i class="fa-solid fa-cake-candles me-2"></i>{% if age is not None %}{{ age }} years old{% else %}Add your date of birth{% endif %}</span>
+                    </div>
+                    <div class="profile-actions mt-4">
+                        <button type="button" class="btn btn-profile-primary" onclick="document.getElementById('profile-form').scrollIntoView({behavior:'smooth'})">
+                            <i class="fa-solid fa-pen me-2"></i>Edit Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="profile-card h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div>
+                            <p class="section-label mb-2">Account Details</p>
+                            <h3 class="mb-0">Personal Information</h3>
+                        </div>
+                        <span class="profile-pill">Updated securely</span>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success rounded-3 mb-4">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" id="profile-form">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.full_name.label }}</label>
+                                {{ form.full_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.email.label }}</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.mobile_no.label }}</label>
+                                {{ form.mobile_no }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.dob.label }}</label>
+                                {{ form.dob }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.gender.label }}</label>
+                                {{ form.gender }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">{{ form.profile_image.label }}</label>
+                                {{ form.profile_image }}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="submit" class="btn btn-profile-primary">
+                                <i class="fa-solid fa-floppy-disk me-2"></i>Save Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
