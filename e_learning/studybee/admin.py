@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AboutUs, ContactMessage, Course, CustomUser, LiveClass, LiveClassResource, OtpVerification
+from .models import AboutUs, Article, ContactMessage, Course, CustomUser, LiveClass, LiveClassResource, OtpVerification
 
 
 @admin.register(CustomUser)
@@ -45,6 +45,14 @@ class AboutUsAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at')
     ordering = ('-created_at',)
     search_fields = ('title', 'subtitle', 'overview', 'mission', 'vision', 'values')
+
+
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'author', 'published_at', 'reading_time')
+    prepopulated_fields = {'slug': ('title',)}
+    search_fields = ('title', 'category', 'author', 'summary')
+    ordering = ('-published_at', '-created_at')
 
 
 @admin.register(LiveClass)
