@@ -163,6 +163,33 @@ class LiveClassResource(models.Model):
         return f'{self.live_class.title} - {self.title}'
 
 
+class Article(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, unique=True)
+    category = models.CharField(max_length=80, default='Learning')
+    summary = models.TextField(max_length=300)
+    content = models.TextField(blank=True)
+    author = models.CharField(max_length=120, default='StudyBee Team')
+    reading_time = models.CharField(max_length=30, default='5 min read')
+    published_at = models.DateField(auto_now_add=True)
+    image = models.ImageField(upload_to='articles/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-published_at', '-created_at']
+        verbose_name = 'Article'
+        verbose_name_plural = 'Articles'
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+
 class ChatMessage(models.Model):
     user = models.ForeignKey(
         CustomUser,

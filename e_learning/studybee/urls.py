@@ -1,9 +1,10 @@
 from django.urls import path
 
-from .views import (about_view, ai_chat_send, ai_chat_view, contact_view,
-                    course_detail_view, course_list_view, dashboard, home,
-                    live_classes_view, login_view, logout_view, profile_view,
-                    register_view, verify_otp_view)
+from .views import (about_view, ai_chat_send, ai_chat_view, article_detail_view,
+                    article_list_view, contact_view, course_detail_view,
+                    course_list_view, dashboard, home, live_classes_view,
+                    login_view, logout_view, profile_view, register_view,
+                    verify_otp_view)
 
 urlpatterns = [
     path('', home, name='home'),
@@ -11,6 +12,8 @@ urlpatterns = [
     path('contact/', contact_view, name='contact'),
     path('courses/', course_list_view, name='courses'),
     path('courses/<slug:slug>/', course_detail_view, name='course_detail'),
+    path('articles/', article_list_view, name='articles'),
+    path('articles/<slug:slug>/', article_detail_view, name='article_detail'),
     path('live-classes/', live_classes_view, name='live_classes'),
     path('ai-chat/', ai_chat_view, name='ai_chat'),
     path('ai-chat/send/', ai_chat_send, name='ai_chat_send'),

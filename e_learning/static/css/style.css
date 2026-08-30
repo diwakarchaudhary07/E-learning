@@ -34,12 +34,14 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 14px 32px;
-    margin: 0 auto;
-    width: 100%;
+    margin: 0 10px;
+    width: calc(100% - 20px);
     max-width: 1440px;
     background: linear-gradient(90deg, #ffffff 0%, #f9f7ef 100%);
-    border-bottom: 1px solid var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
     box-shadow: 0 2px 12px var(--shadow);
+    overflow: hidden;
 }
 
 .nav-brand {

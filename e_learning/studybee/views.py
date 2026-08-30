@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -9,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from .forms import LoginForm, ProfileForm, RegisterForm
-from .models import AboutUs, ChatMessage, ContactMessage, Course, CustomUser, LiveClass, OtpVerification
+from .models import AboutUs, Article, ChatMessage, ContactMessage, Course, CustomUser, LiveClass, OtpVerification
 
 
 def home(request):
@@ -54,13 +55,18 @@ def register_view(request):
                 otp_code=otp_code,
                 expires_at=timezone.now() + timedelta(minutes=10),
             )
-            send_mail(
-                'Verify your email',
-                f'Your OTP is {otp_code}. It expires in 10 minutes.',
-                'boyroyal4853@gmail.com',
-                [user.email],
-                fail_silently=True,
-            )
+            try:
+                send_mail(
+                    'Verify your email',
+                    f'Your OTP is {otp_code}. It expires in 10 minutes.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False,
+                )
+            except Exception:
+                messages.error(request, 'OTP could not be sent. Please check your SMTP credentials and try again.')
+                return redirect('register')
+
             messages.success(request, 'Account created. Please verify your email with the OTP sent to your inbox.')
             return redirect('verify_otp', user_id=user.id)
     else:
@@ -171,6 +177,16 @@ def live_classes_view(request):
         'upcoming_classes': upcoming_classes,
         'recorded_classes': recorded_classes,
     })
+
+
+def article_list_view(request):
+    articles = Article.objects.all().order_by('-published_at', '-created_at')[:6]
+    return render(request, 'articles.html', {'articles': articles})
+
+
+def article_detail_view(request, slug):
+    article = get_object_or_404(Article, slug=slug)
+    return render(request, 'article_detail.html', {'article': article})
 
 
 def course_detail_view(request, slug):
