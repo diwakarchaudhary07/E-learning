@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="article-detail">
+    <div class="container">
+        <div class="article-detail-card">
+            {% if article.image %}
+            <img src="{{ article.image.url }}" alt="{{ article.title }}" class="article-detail-image">
+            {% else %}
+            <div class="article-placeholder" style="height: 420px; font-size: 4rem;"> <i class="fa-regular fa-newspaper"></i> </div>
+            {% endif %}
+
+            <div class="article-detail-body">
+                <span class="article-badge">{{ article.category }}</span>
+                <h1>{{ article.title }}</h1>
+                <div class="article-detail-meta">
+                    <span><i class="fa-solid fa-user"></i> {{ article.author }}</span>
+                    <span><i class="fa-regular fa-calendar"></i> {{ article.published_at }}</span>
+                    <span><i class="fa-regular fa-clock"></i> {{ article.reading_time }}</span>
+                </div>
+
+                <p class="lead">{{ article.summary }}</p>
+
+                {% if article.content %}
+                    {{ article.content|linebreaks }}
+                {% else %}
+                    <p>Explore this article to learn practical ideas and expert recommendations tailored for modern learners.</p>
+                {% endif %}
+
+                <div class="article-detail-actions">
+                    <a href="{% url 'articles' %}" class="btn btn-primary">Back to articles</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

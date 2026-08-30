@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="articles-hero">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="eyebrow">Learning & insights</span>
+                <h1>Articles</h1>
+                <p>Explore practical strategies, expert guidance, and industry insights that help students and professionals grow faster with confidence.</p>
+                <div class="articles-hero-actions">
+                    <a href="#articles-list" class="btn btn-primary">Explore articles</a>
+                    <a href="{% url 'courses' %}" class="btn btn-outline-light">Browse courses</a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="articles-hero-card">
+                    <div class="article-highlight">
+                        {% if articles %}
+                        <span class="article-highlight-badge">Featured</span>
+                        <h3>{{ articles.0.title }}</h3>
+                        <p>{{ articles.0.summary }}</p>
+                        <div class="article-highlight-meta">
+                            <span>{{ articles.0.author }}</span>
+                            <span>{{ articles.0.published_at }}</span>
+                            <span>{{ articles.0.reading_time }}</span>
+                        </div>
+                        <a href="{% url 'article_detail' articles.0.slug %}" class="read-link">Read the full article <i class="fa-solid fa-arrow-right"></i></a>
+                        {% else %}
+                        <span class="article-highlight-badge">Featured</span>
+                        <h3>New learning resources coming soon</h3>
+                        <p>Fresh guides, study tips, and career-building insights will be added here regularly.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="articles-section" id="articles-list">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Insights</span>
+            <h2>Latest Insights</h2>
+            <p>Stay ahead with fresh ideas, real-world advice, and actionable learning strategies from industry experts.</p>
+        </div>
+
+        <div class="articles-filters">
+            <span class="filter-chip active">All</span>
+            <span class="filter-chip">Learning</span>
+            <span class="filter-chip">Career</span>
+            <span class="filter-chip">Productivity</span>
+            <span class="filter-chip">Skills</span>
+        </div>
+
+        <div class="articles-grid">
+            {% for article in articles %}
+            <article class="article-card">
+                {% if article.image %}
+                <img src="{{ article.image.url }}" alt="{{ article.title }}" class="article-thumbnail">
+                {% else %}
+                <div class="article-placeholder"><i class="fa-regular fa-newspaper"></i></div>
+                {% endif %}
+                <div class="article-content">
+                    <span class="article-badge">{{ article.category }}</span>
+                    <div class="article-meta">
+                        <span>{{ article.author }}</span>
+                        <span>{{ article.published_at }}</span>
+                        <span>{{ article.reading_time }}</span>
+                    </div>
+                    <h3><a href="{% url 'article_detail' article.slug %}">{{ article.title }}</a></h3>
+                    <p>{{ article.summary }}</p>
+                    <div class="article-footer">
+                        <a href="{% url 'article_detail' article.slug %}" class="read-more-link">Read article <i class="fa-solid fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </article>
+            {% empty %}
+            <div class="col-12">
+                <div class="empty-state text-center py-5">
+                    <h3>No articles available yet</h3>
+                    <p>Check back soon for new learning resources and expert insights.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,3 +1,6 @@
+from unittest.mock import patch
+
+from django.conf import settings
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -71,6 +74,23 @@ class EmailOtpRegistrationTests(TestCase):
         self.assertFalse(user.is_email_verified)
         self.assertTrue(OtpVerification.objects.filter(user=user).exists())
 
+    @patch('studybee.views.send_mail')
+    def test_register_uses_real_smtp_settings_without_silencing_failures(self, mock_send_mail):
+        with self.settings(EMAIL_HOST_USER='actual-user@gmail.com', EMAIL_HOST_PASSWORD='actual-app-password'):
+            response = self.client.post(reverse('register'), {
+                'username': 'smtpuser',
+                'full_name': 'SMTP User',
+                'email': 'smtpuser@example.com',
+                'mobile_no': '9876543210',
+                'password1': 'StrongPass123',
+                'password2': 'StrongPass123',
+            })
+
+            self.assertEqual(response.status_code, 302)
+            mock_send_mail.assert_called_once()
+            self.assertFalse(mock_send_mail.call_args.kwargs.get('fail_silently', False))
+            self.assertEqual(mock_send_mail.call_args.args[2], settings.DEFAULT_FROM_EMAIL)
+
 
 class ProfilePageTests(TestCase):
     def setUp(self):
@@ -142,3 +162,12 @@ class LiveClassPageTests(TestCase):
         self.assertContains(response, 'Amit Kumar')
         self.assertContains(response, 'Backend Development')
         self.assertContains(response, 'LIVE')
+
+
+class ArticlePageTests(TestCase):
+    def test_articles_page_loads(self):
+        response = self.client.get(reverse('articles'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Articles')
+        self.assertContains(response, 'Latest Insights')
