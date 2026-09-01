@@ -60,19 +60,59 @@
             </div>
 
             <div class="profile-menu">
-                <button class="profile-btn" type="button" aria-label="Profile menu">
-                    <i class="fa-solid fa-user"></i>
-                </button>
-                <div class="profile-dropdown">
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'dashboard' %}">Dashboard</a>
-                        <a href="{% url 'profile' %}">Profile</a>
-                        <a href="{% url 'logout' %}">Logout</a>
-                    {% else %}
-                        <a href="{% url 'register' %}">Register</a>
-                        <a href="{% url 'login' %}">Login</a>
-                    {% endif %}
-                </div>
+                {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="profile-btn dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile menu">
+                            {% if user.profile_image %}
+                                <img src="{{ user.profile_image.url }}" alt="{{ user.full_name }}" class="profile-avatar" title="{{ user.full_name }}">
+                            {% else %}
+                                <i class="fa-solid fa-user"></i>
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end profile-dropdown-menu" aria-labelledby="profileDropdown">
+                            <li class="dropdown-header px-3 py-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if user.profile_image %}
+                                        <img src="{{ user.profile_image.url }}" alt="{{ user.full_name }}" class="profile-avatar-sm" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 16px;">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold">{{ user.full_name }}</div>
+                                        <small class="text-muted d-block">{{ user.email }}</small>
+                                    </div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard' %}" title="View your dashboard">
+                                <i class="fa-solid fa-gauge me-2"></i>My Dashboard
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'profile' %}" title="Edit your profile">
+                                <i class="fa-solid fa-user-pen me-2"></i>My Profile
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}" title="Sign out from your account">
+                                <i class="fa-solid fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="dropdown">
+                        <button class="profile-btn dropdown-toggle" type="button" id="authDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Authentication menu">
+                            <i class="fa-solid fa-user"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end profile-dropdown-menu" aria-labelledby="authDropdown">
+                            <li><a class="dropdown-item" href="{% url 'login' %}" title="Sign in to your account">
+                                <i class="fa-solid fa-sign-in-alt me-2"></i>Login
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'register' %}" title="Create a new account">
+                                <i class="fa-solid fa-user-plus me-2"></i>Register
+                            </a></li>
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </header>
