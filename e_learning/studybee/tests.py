@@ -91,6 +91,52 @@ class EmailOtpRegistrationTests(TestCase):
             self.assertFalse(mock_send_mail.call_args.kwargs.get('fail_silently', False))
             self.assertEqual(mock_send_mail.call_args.args[2], settings.DEFAULT_FROM_EMAIL)
 
+    @patch('studybee.views.send_mail')
+    def test_login_sends_otp_before_authenticating(self, mock_send_mail):
+        user = CustomUser.objects.create_user(
+            username='loginuser',
+            email='loginuser@example.com',
+            password='StrongPass123',
+            full_name='Login User',
+            is_active=True,
+            is_email_verified=True,
+        )
+
+        response = self.client.post(reverse('login'), {
+            'username': user.email,
+            'password': 'StrongPass123',
+        })
+
+        self.assertRedirects(response, reverse('verify_otp', args=[user.id]))
+        mock_send_mail.assert_called_once()
+        self.assertContains(response, 'login OTP', status_code=302, html=False)
+        self.assertTrue(OtpVerification.objects.filter(user=user, is_used=False).exists())
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    @patch('studybee.views.send_mail')
+    def test_login_otp_authenticates_user_after_verification(self, mock_send_mail):
+        user = CustomUser.objects.create_user(
+            username='verifylogin',
+            email='verifylogin@example.com',
+            password='StrongPass123',
+            full_name='Verify Login',
+            is_active=True,
+            is_email_verified=True,
+        )
+
+        self.client.post(reverse('login'), {
+            'username': user.email,
+            'password': 'StrongPass123',
+        })
+        otp = OtpVerification.objects.get(user=user)
+
+        response = self.client.post(reverse('verify_otp', args=[user.id]), {'otp_code': otp.otp_code})
+
+        self.assertRedirects(response, reverse('home'))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        otp.refresh_from_db()
+        self.assertTrue(otp.is_used)
+
 
 class ProfilePageTests(TestCase):
     def setUp(self):
