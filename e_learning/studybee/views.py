@@ -13,6 +13,35 @@ from .forms import LoginForm, ProfileForm, RegisterForm
 from .models import AboutUs, Article, ChatMessage, ContactMessage, Course, CustomUser, LiveClass, OtpVerification
 
 
+OTP_EXPIRY_MINUTES = 10
+OTP_PURPOSE_SESSION_KEY = 'otp_purpose'
+OTP_PURPOSE_REGISTRATION = 'registration'
+OTP_PURPOSE_LOGIN = 'login'
+
+
+def create_and_send_otp(user):
+    """Create a single-use OTP and deliver it through the configured SMTP backend."""
+    OtpVerification.objects.filter(user=user, is_used=False).update(is_used=True)
+    otp_code = OtpVerification.generate_code()
+    otp = OtpVerification.objects.create(
+        user=user,
+        otp_code=otp_code,
+        expires_at=timezone.now() + timedelta(minutes=OTP_EXPIRY_MINUTES),
+    )
+    send_mail(
+        'Your StudyBee verification code',
+        (
+            f'Hello {user.full_name or user.email},\n\n'
+            f'Your StudyBee OTP is {otp_code}. It expires in {OTP_EXPIRY_MINUTES} minutes.\n\n'
+            'If you did not request this code, you can safely ignore this email.'
+        ),
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=False,
+    )
+    return otp
+
+
 def home(request):
     courses = Course.objects.all().order_by('-created_at')[:6]
     return render(request, 'home.html', {'courses': courses})
@@ -49,25 +78,15 @@ def register_view(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            otp_code = OtpVerification.generate_code()
-            otp = OtpVerification.objects.create(
-                user=user,
-                otp_code=otp_code,
-                expires_at=timezone.now() + timedelta(minutes=10),
-            )
             try:
-                send_mail(
-                    'Verify your email',
-                    f'Your OTP is {otp_code}. It expires in 10 minutes.',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [user.email],
-                    fail_silently=False,
-                )
+                create_and_send_otp(user)
             except Exception:
+                user.delete()
                 messages.error(request, 'OTP could not be sent. Please check your SMTP credentials and try again.')
                 return redirect('register')
 
             messages.success(request, 'Account created. Please verify your email with the OTP sent to your inbox.')
+            request.session[OTP_PURPOSE_SESSION_KEY] = OTP_PURPOSE_REGISTRATION
             return redirect('verify_otp', user_id=user.id)
     else:
         form = RegisterForm()
@@ -78,17 +97,25 @@ def register_view(request):
 def verify_otp_view(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
     otp_obj = OtpVerification.objects.filter(user=user).order_by('-created_at').first()
+    otp_purpose = request.session.get(OTP_PURPOSE_SESSION_KEY, OTP_PURPOSE_REGISTRATION)
 
     if request.method == 'POST':
         otp_code = request.POST.get('otp_code', '').strip()
         if otp_obj and otp_obj.is_valid() and otp_code == otp_obj.otp_code:
             otp_obj.is_used = True
             otp_obj.save()
+            if otp_purpose == OTP_PURPOSE_LOGIN:
+                login(request, user)
+                messages.success(request, 'Login verified successfully.')
+                request.session.pop(OTP_PURPOSE_SESSION_KEY, None)
+                return redirect('home')
+
             user.is_active = True
             user.is_email_verified = True
-            user.save()
+            user.save(update_fields=['is_active', 'is_email_verified'])
             login(request, user)
-            messages.success(request, 'Email verified successfully. You can now log in.')
+            request.session.pop(OTP_PURPOSE_SESSION_KEY, None)
+            messages.success(request, 'Email verified successfully. You are now logged in.')
             return redirect('home')
         messages.error(request, 'Invalid or expired OTP. Please try again.')
 
@@ -106,8 +133,15 @@ def login_view(request):
             if not user.is_email_verified:
                 messages.error(request, 'Please verify your email before logging in.')
                 return redirect('register')
-            login(request, user)
-            return redirect('home')
+            try:
+                create_and_send_otp(user)
+            except Exception:
+                messages.error(request, 'Login OTP could not be sent. Please check your SMTP credentials and try again.')
+                return redirect('login')
+
+            request.session[OTP_PURPOSE_SESSION_KEY] = OTP_PURPOSE_LOGIN
+            messages.success(request, 'A login OTP has been sent to your email address.')
+            return redirect('verify_otp', user_id=user.id)
     else:
         form = LoginForm()
 
