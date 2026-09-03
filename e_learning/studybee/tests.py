@@ -3,6 +3,7 @@ from unittest.mock import patch
 from django.conf import settings
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.contrib.messages import get_messages
 from django.urls import reverse
 
 from .models import Course, CustomUser, LiveClass, OtpVerification
@@ -109,7 +110,10 @@ class EmailOtpRegistrationTests(TestCase):
 
         self.assertRedirects(response, reverse('verify_otp', args=[user.id]))
         mock_send_mail.assert_called_once()
-        self.assertContains(response, 'login OTP', status_code=302, html=False)
+        self.assertTrue(any(
+            'A login OTP has been sent' in str(message)
+            for message in get_messages(response.wsgi_request)
+        ))
         self.assertTrue(OtpVerification.objects.filter(user=user, is_used=False).exists())
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 

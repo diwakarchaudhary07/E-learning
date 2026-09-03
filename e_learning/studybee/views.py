@@ -15,6 +15,7 @@ from .models import AboutUs, Article, ChatMessage, ContactMessage, Course, Custo
 
 OTP_EXPIRY_MINUTES = 10
 OTP_PURPOSE_SESSION_KEY = 'otp_purpose'
+OTP_USER_SESSION_KEY = 'otp_user_id'
 OTP_PURPOSE_REGISTRATION = 'registration'
 OTP_PURPOSE_LOGIN = 'login'
 
@@ -87,6 +88,7 @@ def register_view(request):
 
             messages.success(request, 'Account created. Please verify your email with the OTP sent to your inbox.')
             request.session[OTP_PURPOSE_SESSION_KEY] = OTP_PURPOSE_REGISTRATION
+            request.session[OTP_USER_SESSION_KEY] = user.id
             return redirect('verify_otp', user_id=user.id)
     else:
         form = RegisterForm()
@@ -96,6 +98,11 @@ def register_view(request):
 
 def verify_otp_view(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
+    challenge_user_id = request.session.get(OTP_USER_SESSION_KEY)
+    if challenge_user_id is not None and str(challenge_user_id) != str(user.id):
+        messages.error(request, 'That verification code belongs to a different account.')
+        return redirect('login')
+
     otp_obj = OtpVerification.objects.filter(user=user).order_by('-created_at').first()
     otp_purpose = request.session.get(OTP_PURPOSE_SESSION_KEY, OTP_PURPOSE_REGISTRATION)
 
@@ -108,6 +115,7 @@ def verify_otp_view(request, user_id):
                 login(request, user)
                 messages.success(request, 'Login verified successfully.')
                 request.session.pop(OTP_PURPOSE_SESSION_KEY, None)
+                request.session.pop(OTP_USER_SESSION_KEY, None)
                 return redirect('home')
 
             user.is_active = True
@@ -115,6 +123,7 @@ def verify_otp_view(request, user_id):
             user.save(update_fields=['is_active', 'is_email_verified'])
             login(request, user)
             request.session.pop(OTP_PURPOSE_SESSION_KEY, None)
+            request.session.pop(OTP_USER_SESSION_KEY, None)
             messages.success(request, 'Email verified successfully. You are now logged in.')
             return redirect('home')
         messages.error(request, 'Invalid or expired OTP. Please try again.')
@@ -140,6 +149,7 @@ def login_view(request):
                 return redirect('login')
 
             request.session[OTP_PURPOSE_SESSION_KEY] = OTP_PURPOSE_LOGIN
+            request.session[OTP_USER_SESSION_KEY] = user.id
             messages.success(request, 'A login OTP has been sent to your email address.')
             return redirect('verify_otp', user_id=user.id)
     else:
